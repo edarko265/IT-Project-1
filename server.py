@@ -49,7 +49,9 @@ def send_command(conn):
             print(client_response, end="")
 
 def main():
+    global host
     create_socket()
+    print(host)
     bind_socket()
     socket_accept()
 
