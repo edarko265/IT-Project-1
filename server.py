@@ -7,9 +7,10 @@ def create_socket ():
         global host
         global port 
         global s
-        host = socket.gethostbyname(socket.gethostname())
-        port = 9999
-        s = socket.socket()
+        #host = socket.gethostbyname(socket.gethostname())
+        host = '89.166.103.198'
+        port = 8080
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as msg:
         print("socket creation error: " + str(msg))
 
