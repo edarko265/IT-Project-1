@@ -1,59 +1,42 @@
-import socket
-import sys
 
-#create a socket (connect 2 computers)
-def create_socket ():
-    try:
-        global host
-        global port 
-        global s
-        #host = socket.gethostbyname(socket.gethostname())
-        host = '89.166.103.198'
-        port = 8080
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error as msg:
-        print("socket creation error: " + str(msg))
+# This code is for the server 
 
-#binding the socket and listening for connections
-def bind_socket():
-    try:
-        global host
-        global port 
-        global s
+import socket, cv2, pickle,struct,imutils
+import btn
+# Socket Create
+server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+host_ip = '85.23.95.56'
+print('HOST IP:',host_ip)
+port = 8080
+socket_address = (host_ip,port)
 
-        print("Binding the Port: " +str(port))
-        s.bind((host,port))
-        s.listen(5)
-    except socket.error as msg:
-        print("Socket binding error" + str(msg) +"\n" + "Retrying...")
-        bind_socket()
+# Socket Bind
+server_socket.bind(socket_address)
 
-#Establish connection with a client (Socket must be listening)
+# Socket Listen
+server_socket.listen(5)
+print("LISTENING AT:",socket_address)
 
-def socket_accept():
-    conn,address = s.accept()
-    print("connection has been establish |" + "IP" +address[0]+" |Port " + str(address[1]))
-    send_command(conn)
-    conn.close()
-
-#Send command to client
-def send_command(conn):
-    while True:
-        cmd = input()
-        if cmd == "quit":
-            conn.close()
-            s.close()
-            sys.exit()
-        if len(str.encode(cmd)) > 0: #To see if the user type in anything
-            conn.send(str.encode(cmd))
-            client_response = str(conn.recv(1024),'utf-8')
-            print(client_response, end="")
-
-def main():
-    global host
-    create_socket()
-    print(host)
-    bind_socket()
-    socket_accept()
-
-main()
+# Socket Accept
+client_socket,addr = server_socket.accept()
+print('GOT CONNECTION FROM:',addr)
+while True:
+	if btn.btn_pressed():
+		while True:
+			if client_socket:
+				vid = cv2.VideoCapture(0)
+				
+				while(vid.isOpened()):
+					img,frame = vid.read()
+					#frame = imutils.resize(frame,width=500)
+					a = pickle.dumps(frame)
+					message = struct.pack("Q",len(a))+a
+					client_socket.sendall(message)
+					
+					cv2.imshow('TRANSMITTING VIDEO',frame)
+					key = cv2.waitKey(1) & 0xFF
+					if key ==ord('q'):
+						client_socket.close()
+						server_socket.close()
+	else:
+		pass
