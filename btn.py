@@ -6,7 +6,7 @@ GPIO.setup(14, GPIO.OUT)
 GPIO.setup(17,GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 GPIO.output(14,GPIO.HIGH)
-
+GPIO.setwarnings(False)
 def btn_pressed():
     while True: 
         if GPIO.input(17) == GPIO.LOW:
