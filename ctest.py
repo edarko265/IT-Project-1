@@ -1,30 +1,6 @@
-import socket
-
-
-def client_program():
-    host = '85.23.95.56'  # as both code is running on same pc
-    port = 5000  # socket server port number
-
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
-
-    message = input(" -> ")  # take input
-
-    while message.lower().strip() != 'bye':
-        client_socket.send(message.encode())  # send message
-        data = client_socket.recv(1024).decode()  # receive response
-
-        print('Received from server: ' + data)  # show in terminal
-
-        message = input(" -> ")  # again take input
-
-    client_socket.close()  # close the connection
-
-# Welcome to PyShine
-# This is client code to receive video and audio frames over TCP
 
 import socket,os
-import threading, wave, pyaudio, pickle,struct
+import threading, pyaudio, pickle,struct
 host_name = socket.gethostname()
 host_ip = '85.23.95.56'#  socket.gethostbyname(host_name)
 print(host_ip)
@@ -34,7 +10,7 @@ def audio_stream():
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
-    RATE = 16000
+    RATE = 22050
     OUTPUT_INDEX=3
 
     p = pyaudio.PyAudio()

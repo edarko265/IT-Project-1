@@ -11,6 +11,7 @@ CHANNELS = 1
 RATE = 16000
 RECORD_SECONDS = 5
 INPUT_INDEX=1
+OUTPUT_INDEX=3
 
 
 def get_input_device_id():
@@ -25,6 +26,7 @@ def get_input_device_id():
 def record():
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,input_device_index=INPUT_INDEX)
+    out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True,output_device_index=OUTPUT_INDEX)
     print('Recording...')
     obj = wave.open('output.wav', 'wb')
     obj.setnchannels(CHANNELS)
@@ -36,7 +38,8 @@ def record():
             """ a = pickle.dumps(frame)
             msg = struct.pack("Q",len(a))+a
             conn.sendall(msg) """
-            obj.writeframes(bytes(frame))
+            obj.writeframes(frame)
+            out.write(frame)
         except KeyboardInterrupt:
             break
     stream.close()
@@ -53,3 +56,5 @@ def get_output_device_id():
 
 
 get_output_device_id()
+#get_input_device_id()
+#record()

@@ -31,6 +31,7 @@ CHANNELS = 2
 RATE = 44100
 INPUT_INDEX=1
 
+
 #----------------------------------------------------
 
 def footage_stream(conn):
@@ -46,18 +47,21 @@ def footage_stream(conn):
 					if client_socket:
 						vid = cv2.VideoCapture(0)
 						while(vid.isOpened()):
-							img,frame = vid.read()
-							#frame = imutils.resize(frame,width=500)
-							a = pickle.dumps(frame)
-							message = struct.pack("Q",len(a))+a
-							client_socket.sendall(message)
-							
-							cv2.imshow('TRANSMITTING VIDEO',frame)
-							key = cv2.waitKey(1) & 0xFF
-							if key ==ord('q') or start_exit_event:
+							try:
+								img,frame = vid.read()
+								#frame = imutils.resize(frame,width=500)
+								a = pickle.dumps(frame)
+								message = struct.pack("Q",len(a))+a
+								client_socket.sendall(message)
+								cv2.imshow('TRANSMITTING VIDEO',frame)
+								key = cv2.waitKey(1) & 0xFF
+								if key ==ord('q') or start_exit_event:
+										cv2.destroyAllWindows()
+										vid.release()
+										break
+							except Exception as e:
 								cv2.destroyAllWindows()
 								vid.release()
-								break
 					break
 			else:
 				pass
@@ -69,7 +73,7 @@ def footage_stream(conn):
 			
 
 def audio_stream():
-	s=socket.socket()
+	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 	s.bind((host_ip, port-1))
 	while True:
 		try:
@@ -82,7 +86,7 @@ def audio_stream():
 					while True:
 						if client_socket:
 							p = pyaudio.PyAudio()
-							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, input_device_index=INPUT_INDEX)
+							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True,put_device_index=INPUT_INDEX)
 							print('Recording...')
 							while True:
 								frame = stream.read(CHUNK)
@@ -114,6 +118,6 @@ def change_start_exit_event_state():
 t1st=threading.Thread(target=change_start_exit_event_state)
 t1st.start()
 tf=threading.Thread(target=footage_stream, args=(client_socket,))
-tf.start()
+
 ta=threading.Thread(target=audio_stream)
-#ta.start()
+ta.start()
