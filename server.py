@@ -1,5 +1,5 @@
 
-# This code is for the server 
+# This code is for the server sss
 import socket, cv2, pickle,struct, pyaudio, threading
 from time import sleep
 import btn
@@ -29,17 +29,20 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
+INPUT_INDEX=1
 
 #----------------------------------------------------
 
-start_exit_event = False
+global start_exit_event
 
-def footage_stream():
+def footage_stream(conn):
+	client_socket=conn
 	while True:
+
 		try:
-			if not client_socket:
+			""" if not client_socket_cam:
 				server_socket.listen(5)
-				client_socket,addr = server_socket.accept()
+				client_socket_cam,addr = server_socket.accept() """
 			if btn.btn_pressed():
 				while True:
 					if client_socket:
@@ -54,16 +57,21 @@ def footage_stream():
 							cv2.imshow('TRANSMITTING VIDEO',frame)
 							key = cv2.waitKey(1) & 0xFF
 							if key ==ord('q') or start_exit_event:
+								cv2.destroyAllWindows()
 								vid.release()
 								break
 					break
 			else:
 				pass
 		except Exception as e:
-			pass
+			print('Disconected!')
+			print(e)
+			server_socket.listen(5)
+			client_socket,addr = server_socket.accept()
+			
 
 def audio_stream():
-	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+	s=socket.socket()
 	s.bind((host_ip, port-1))
 	while True:
 		try:
@@ -76,7 +84,7 @@ def audio_stream():
 					while True:
 						if client_socket:
 							p = pyaudio.PyAudio()
-							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
+							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, input_device_index=INPUT_INDEX)
 							print('Recording...')
 							while True:
 								frame = stream.read(CHUNK)
@@ -91,7 +99,7 @@ def audio_stream():
 				else:
 					pass
 		except Exception as e:
-			print('Disconnected')
+			print('Disconnected!!')
 
 def change_start_exit_event_state():
 	while True:
@@ -104,5 +112,8 @@ def change_start_exit_event_state():
 
 
 t1st=threading.Thread(target=change_start_exit_event_state)
-tf=threading.Thread(target=footage_stream)
+t1st.start()
+tf=threading.Thread(target=footage_stream, args=(client_socket,))
+tf.start()
 ta=threading.Thread(target=audio_stream)
+#ta.start()
