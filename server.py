@@ -47,14 +47,15 @@ def footage_stream(conn):
 				while True:
 					if client_socket:
 						vid = cv2.VideoCapture(0)
+						vid.set(cv2.CAP_PROP_FPS, 60)
 						while(vid.isOpened()):
 							img,frame = vid.read()
 							#frame = imutils.resize(frame,width=500)
+							cv2.imshow('TRANSMITTING VIDEO',frame)
 							a = pickle.dumps(frame)
 							message = struct.pack("Q",len(a))+a
 							client_socket.sendall(message)
 							
-							cv2.imshow('TRANSMITTING VIDEO',frame)
 							key = cv2.waitKey(1) & 0xFF
 							if key ==ord('q') or btn.btn_pressed():
 								print('?')
@@ -88,7 +89,6 @@ def audio_stream():
 							print('Recording...')
 							while True:
 								frame = stream.read(CHUNK)
-								print(type(frame))
 								""" a = pickle.dumps(frame)
 								msg = struct.pack("Q",len(a))+a
 								client_socket.sendall(msg) """
@@ -119,6 +119,6 @@ def change_start_exit_event_state():
 t1st=threading.Thread(target=change_start_exit_event_state)
 t1st.start()
 tf=threading.Thread(target=footage_stream, args=(client_socket,))
-#tf.start()
+tf.start()
 ta=threading.Thread(target=audio_stream)
 ta.start()
