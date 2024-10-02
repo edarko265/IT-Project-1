@@ -41,7 +41,15 @@ def record():
             break
     stream.close()
     p.terminate()
-    obj.close()
+
+def get_output_device_id():
+    p = pyaudio.PyAudio()
+    info = p.get_host_api_info_by_index(0)
+    numdevices = info.get('deviceCount')
+    for i in range(0, numdevices):
+        if (p.get_device_info_by_index(i).get('maxOutputChannels')) > 0:
+            print("Output Device id ", i, " - ", p.get_device_info_by_index(i).get('name'))
+    p.terminate()
 
 #get_input_device_id()
 
