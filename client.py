@@ -1,5 +1,5 @@
 # lets make the client code
-import socket,cv2, pickle,struct, pyaudio
+import socket,cv2, pickle,struct, pyaudio, threading
 from playsound import playsound
 
 
@@ -19,7 +19,7 @@ CHANNELS = 2
 RATE = 44100
 
 p = pyaudio.PyAudio()
-stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
+stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
 #-----------------------------
 
 
@@ -45,8 +45,10 @@ def camera_stream():
 				cv2.imshow("RECEIVING VIDEO",frame)
 				key = cv2.waitKey(1) & 0xFF
 				if key == ord('q'):
+					cv2.destroyAllWindows()
 					break
 			except Exception as e:
+				cv2.destroyAllWindows()
 				break
 		else:
 			pass
@@ -54,7 +56,7 @@ def camera_stream():
 
 def audio_stream():
 
-	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+	s=socket.socket()
 	client_socket.connect((host_ip,port-1))
 	print('Audio stream connected to server', host_ip, '+ ', port-1)
 	data = b""
@@ -84,4 +86,8 @@ def audio_stream():
 
 
 #client_socket.close()
-	
+tf = threading.Thread(target=camera_stream)
+ta = threading.Thread(target=audio_stream)
+
+tf.start()
+#ta.start()
