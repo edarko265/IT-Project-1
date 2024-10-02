@@ -3,7 +3,7 @@ import socket
 
 def server_program():
     # get the hostname
-    host = '192.168.56.1'
+    host = '85.23.95.56'
     port = 5000  # initiate port no above 1024
 
     server_socket = socket.socket()  # get instance
@@ -27,7 +27,7 @@ def server_program():
                 conn.send(data.encode())  # send data to the client
 
         except Exception as e:
-            print('disconnected')
+            print(e)
 
 #conn.close()  # close the connection
 

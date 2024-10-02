@@ -54,6 +54,7 @@ def get_output_device_id():
             print("Output Device id ", i, " - ", p.get_device_info_by_index(i).get('name'))
     p.terminate()
 
+#get_input_device_id()
 
 get_output_device_id()
 #get_input_device_id()
