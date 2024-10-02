@@ -33,8 +33,6 @@ INPUT_INDEX=1
 
 #----------------------------------------------------
 
-global start_exit_event
-
 def footage_stream(conn):
 	client_socket=conn
 	while True:
@@ -102,6 +100,8 @@ def audio_stream():
 			print('Disconnected!!')
 
 def change_start_exit_event_state():
+	global start_exit_event
+	start_exit_event = False
 	while True:
 		if btn.btn_pressed():
 			start_exit_event = True
