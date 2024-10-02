@@ -16,10 +16,11 @@ print('Connected to server', host_ip, '+ ', port)
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
-RATE = 44100
+RATE = 16000
+OUTPUT_INDEX=5
 
 p = pyaudio.PyAudio()
-stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
+stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True, frames_per_buffer=CHUNK, output_device_index=OUTPUT_INDEX)
 #-----------------------------
 
 
@@ -57,14 +58,17 @@ def camera_stream():
 def audio_stream():
 
 	s=socket.socket()
-	client_socket.connect((host_ip,port-1))
+	s.connect((host_ip,port-1))
 	print('Audio stream connected to server', host_ip, '+ ', port-1)
-	data = b""
-	payload_size = struct.calcsize("Q")
+
+	""" data = b""
+	payload_size = struct.calcsize("Q") """
+
+
 	while True:
-		if client_socket:
-			while len(data) < payload_size:
-				packet = client_socket.recv(4*1024) # 4K
+		if s:
+			""" while len(data) < payload_size:
+				packet = s.recv(4*1024) # 4K
 				if not packet: break
 				data+=packet
 			packed_msg_size = data[:payload_size]
@@ -72,13 +76,22 @@ def audio_stream():
 			msg_size = struct.unpack("Q",packed_msg_size)[0]
 			
 			while len(data) < msg_size:
-				data += client_socket.recv(4*1024)
-			try:
+				data += client_socket.recv(4*1024) 
+ 			try:
 				frame_data = data[:msg_size]
 				data  = data[msg_size:]
-				frame = pickle.loads(frame_data)
+				frame = pickle.loads(frame_data) """
+			
+			try:
+				frame = s.recv(CHUNK)
 				stream.write(frame)
+			except KeyboardInterrupt:
+				cv2.destroyAllWindows()
+				stream.close()
+				break
 			except Exception as e:
+				cv2.destroyAllWindows()
+				stream.close()
 				break
 		else:
 			pass
@@ -90,4 +103,4 @@ tf = threading.Thread(target=camera_stream)
 ta = threading.Thread(target=audio_stream)
 
 tf.start()
-#ta.start()
+ta.start()
