@@ -15,11 +15,11 @@ def btn_pressed():
             return False
         time.sleep(1)
 
-while True:
+""" while True:
     try:
         if btn_pressed():
             GPIO.output(14,GPIO.HIGH)
         else:
             GPIO.output(14,GPIO.LOW)
     except KeyboardInterrupt:
-        GPIO.cleanup()
+        GPIO.cleanup() """

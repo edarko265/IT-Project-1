@@ -4,6 +4,7 @@ import socket, cv2, pickle,struct, pyaudio, threading
 from time import sleep
 import btn
 import microphone
+
 #-------------------------------------------------
 # Socket Create
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -28,10 +29,11 @@ print('GOT CONNECTION FROM:',addr)
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
-RATE = 44100
-INPUT_INDEX=1
+RATE = 16000
+INPUT_INDEX = 1
 
 #----------------------------------------------------
+
 
 def footage_stream(conn):
 	client_socket=conn
@@ -54,7 +56,8 @@ def footage_stream(conn):
 							
 							cv2.imshow('TRANSMITTING VIDEO',frame)
 							key = cv2.waitKey(1) & 0xFF
-							if key ==ord('q') or start_exit_event:
+							if key ==ord('q') or btn.btn_pressed():
+								print('?')
 								cv2.destroyAllWindows()
 								vid.release()
 								break
@@ -69,27 +72,28 @@ def footage_stream(conn):
 			
 
 def audio_stream():
-	s=socket.socket()
+	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 	s.bind((host_ip, port-1))
+	s.listen(5)
+	client_socket, addr=s.accept()
+	print('Server for audio is connected at IP: ', host_ip, 'and Port: ', port-1)
 	while True:
 		try:
-			s.listen(5)
-			client_socket, addr=s.accept()
-			print('Server for audio is connected at IP: ', host_ip, 'and Port: ', port-1)
-
 			while True:
 				if btn.btn_pressed():
 					while True:
 						if client_socket:
 							p = pyaudio.PyAudio()
-							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, input_device_index=INPUT_INDEX)
+							stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer= CHUNK,input_device_index=INPUT_INDEX)
 							print('Recording...')
 							while True:
 								frame = stream.read(CHUNK)
-								a = pickle.dumps(frame)
+								print(type(frame))
+								""" a = pickle.dumps(frame)
 								msg = struct.pack("Q",len(a))+a
-								client_socket.sendall(msg)
-								if start_exit_event:
+								client_socket.sendall(msg) """
+								client_socket.send(frame)
+								if btn.btn_pressed():
 									stream.close()
 									p.terminate()
 									break
@@ -97,6 +101,7 @@ def audio_stream():
 				else:
 					pass
 		except Exception as e:
+			print(e)
 			print('Disconnected!!')
 
 def change_start_exit_event_state():
@@ -114,6 +119,6 @@ def change_start_exit_event_state():
 t1st=threading.Thread(target=change_start_exit_event_state)
 t1st.start()
 tf=threading.Thread(target=footage_stream, args=(client_socket,))
-tf.start()
+#tf.start()
 ta=threading.Thread(target=audio_stream)
-#ta.start()
+ta.start()
