@@ -56,6 +56,6 @@ def get_output_device_id():
 
 #get_input_device_id()
 
-get_output_device_id()
+#get_output_device_id()
 #get_input_device_id()
 #record()

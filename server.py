@@ -3,12 +3,12 @@
 import socket, cv2, pickle,struct, pyaudio, threading
 from time import sleep
 import btn
-import microphone
+
 
 #-------------------------------------------------
 # Socket Create
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-host_ip = '85.23.95.56'
+host_ip = '192.168.1.117'
 print('HOST IP:',host_ip)
 port = 8080
 socket_address = (host_ip,port)
@@ -30,7 +30,7 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 16000
-INPUT_INDEX = 1
+INPUT_INDEX = 2
 
 #----------------------------------------------------
 
@@ -38,11 +38,7 @@ INPUT_INDEX = 1
 def footage_stream(conn):
 	client_socket=conn
 	while True:
-
 		try:
-			""" if not client_socket_cam:
-				server_socket.listen(5)
-				client_socket_cam,addr = server_socket.accept() """
 			if btn.btn_pressed():
 				while True:
 					if client_socket:
@@ -89,9 +85,6 @@ def audio_stream():
 							print('Recording...')
 							while True:
 								frame = stream.read(CHUNK)
-								""" a = pickle.dumps(frame)
-								msg = struct.pack("Q",len(a))+a
-								client_socket.sendall(msg) """
 								client_socket.send(frame)
 								if btn.btn_pressed():
 									stream.close()
@@ -104,21 +97,8 @@ def audio_stream():
 			print(e)
 			print('Disconnected!!')
 
-def change_start_exit_event_state():
-	global start_exit_event
-	start_exit_event = False
-	while True:
-		if btn.btn_pressed():
-			start_exit_event = True
-			sleep(5)
-			start_exit_event = False
-		else:
-			pass
 
-
-t1st=threading.Thread(target=change_start_exit_event_state)
-t1st.start()
 tf=threading.Thread(target=footage_stream, args=(client_socket,))
-
+tf.start()
 ta=threading.Thread(target=audio_stream)
 ta.start()
