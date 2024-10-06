@@ -5,7 +5,7 @@ from playsound import playsound
 
 # create socket
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-host_ip = '85.23.95.56' # paste your server ip address here
+host_ip = '192.168.1.117' # paste your server ip address here
 port = 8080
 client_socket.connect((host_ip,port)) # a tuple
 print('Connected to server', host_ip, '+ ', port)
@@ -17,7 +17,7 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 16000
-OUTPUT_INDEX=5
+OUTPUT_INDEX=3
 
 p = pyaudio.PyAudio()
 stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True, frames_per_buffer=CHUNK, output_device_index=OUTPUT_INDEX)
@@ -99,6 +99,7 @@ def audio_stream():
 
 
 #client_socket.close()
+
 tf = threading.Thread(target=camera_stream)
 ta = threading.Thread(target=audio_stream)
 
